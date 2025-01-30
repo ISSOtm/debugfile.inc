@@ -28,30 +28,41 @@ MACRO require_debugfile_inc_v
 \nENDM"""
     INTERNAL_CHK
     ___internal {CUR_VER}, {MIN_VER},0,0
-    PURGE CUR_VER, MIN_VER, INTERNAL_CHK, ___internal
+    purge CUR_VER, MIN_VER, INTERNAL_CHK, ___internal
 ENDM
 
 
 IF DEF(PRINT_DEBUGFILE)
-	PRINTLN "@debugfile 1.0.0"
+	println "@debugfile 1.0.0"
 
 	MACRO dbg_var ; <name>, <default value>
-	    DEF DEFAULT_VALUE equs "0"
+	    def DEFAULT_VALUE equs "0"
 	    IF _NARG > 1
 	        redef DEFAULT_VALUE equs "\2"
 	    ENDC
-	    PRINTLN "@var \1 {DEFAULT_VALUE}"
-	    PURGE DEFAULT_VALUE
+	    println "@var \1 {DEFAULT_VALUE}"
+	    purge DEFAULT_VALUE
 	ENDM
 
 	MACRO dbg_action ; <action:str> [, <condition:dbg_expr>]
-		DEF OFS_FROM_BASE equ @ - {.}
-		DEF ACTION_COND equs ""
+		def OFS_FROM_BASE equ @ - {.}
+		def ACTION_COND equs ""
 		IF _NARG > 1
-			REDEF ACTION_COND equs "\2"
+			redef ACTION_COND equs "\2"
 		ENDC
-		PRINTLN "{.}+{d:OFS_FROM_BASE} x {ACTION_COND}: ", \1
-		PURGE OFS_FROM_BASE, ACTION_COND
+		println "{.}+{d:OFS_FROM_BASE} x {ACTION_COND}: ", \1
+		purge OFS_FROM_BASE, ACTION_COND
+	ENDM
+
+	MACRO dbg_group ; <id:dbg_ident> [, <display name:str>]
+		IF _NARG > 1
+			println "@group \1 \2"
+		ELSE
+			println "@group \1"
+		ENDC
+	ENDM
+	MACRO end_dbg_group
+		println "@endgroup"
 	ENDM
 
 ELSE
@@ -61,31 +72,35 @@ ELSE
 	ENDM
 	MACRO dbg_action
 	ENDM
+	MACRO dbg_group
+	ENDM
+	MACRO end_dbg_group
+	ENDM
 ENDC
 
 MACRO dbg_log ; <message:dbg_str> [, <condition:dbg_expr>]
-	DEF MSG equs \1
-	SHIFT
+	def MSG equs \1
+	shift
 	dbg_action "message \"{MSG}\"", \#
-	PURGE MSG
+	purge MSG
 ENDM
 
 MACRO runtime_assert ; <condition:dbg_expr> [, <message:dbg_str>]
-	DEF MSG equs "assert failure"
+	def MSG equs "assert failure"
 	IF _NARG > 1
-		REDEF MSG equs \2
+		redef MSG equs \2
 	ENDC
 	dbg_action "alert \"{MSG}\"", !(\1)
-	PURGE MSG
+	purge MSG
 ENDM
 
 MACRO unreachable ; [<message:dbg_str>]
-	DEF MSG equs "unreachable code reached!"
+	def MSG equs "unreachable code reached!"
 	IF _NARG > 0
-		REDEF MSG equs \1
+		redef MSG equs \1
 	ENDC
 	dbg_action "alert \"In {.}: {MSG}\""
-	PURGE MSG
+	purge MSG
 ENDM
 
 
